@@ -1,5 +1,5 @@
 {
-  "name": "dd/fiskaly",
+  "name": "drechsler-development/fiskaly",
   "description": "Small PHP client library for the fiskaly Management and SIGN DE API v2",
   "type": "library",
   "license": "proprietary",
