@@ -6,7 +6,7 @@ Schlank gehalten, benötigt nur PHP, cURL und JSON. Alle öffentlichen Methoden 
 ## Installation
 
 ```bash
-composer require dd\fiskaly
+composer require drechsler-development\fiskaly
 ```
 
 ## Aufbau
