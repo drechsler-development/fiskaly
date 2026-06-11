@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace DD\Fiskaly\Examples;
 
-use DD\Fiskaly\Fiskaly;
+use DD\Fiskaly\FiskalyBase;
+use DD\Fiskaly\FiskalyManagement;
+use DD\Fiskaly\FiskalySignDe;
 use DD\Fiskaly\Transaction\PaymentAmount;
 use DD\Fiskaly\Transaction\Receipt;
 use DD\Fiskaly\Util\Uuid;
@@ -18,21 +20,28 @@ use Random\RandomException;
  * Please ensure to replace the placeholder API credentials with your actual test credentials before running the example.
  * Note: This example is for demonstration purposes only and may not cover all edge cases or error handling scenarios. It is recommended to implement additional error handling and validation as needed for production use.
  */
-class TestClass extends Fiskaly {
+class TestClass extends FiskalyBase {
 
 	public string $tssId          = '';
 	public string $clientId       = '';
 	public string $txId           = '';
 	public string $organizationId = '';
+	public string $managedApiKey;
+	public string $managedApiSecret;
+
+	public string $apiKey;
+	public string $apiSecret;
 
 	/**
 	 * @param string $managedApiKey
 	 * @param string $managedApiSecret
 	 * @param string $managedOrganizationId
 	 */
-	public function __construct (string $managedApiKey, string $managedApiSecret, string $managedOrganizationId) {
+	public function __construct (string $managedApiKey, string $managedApiSecret, string $previousOrganizationId = '') {
 
-		parent::__construct ($managedApiKey, $managedApiSecret, $managedOrganizationId);
+		$this->managedApiKey    = $managedApiKey;
+		$this->managedApiSecret = $managedApiSecret;
+		$this->organizationId   = $previousOrganizationId;
 
 	}
 
@@ -48,22 +57,22 @@ class TestClass extends Fiskaly {
 	 * @throws RandomException
 	 * @throws Exception
 	 */
-	public function Run (bool $deleteOrganization = false, bool $createOrganization = false, bool $createTSE = false, bool $deleteNewOrganisationAfterwards = false): void {
+	public function Run (array $newOrganization, array $apiCredentials, string $newAdminPin = '1234567890', string $clientSerialNumber = ''): void {
+
+		$this->clientId = $clientSerialNumber ?: 'KASSE-' . rand (1000, 9999);
 
 		##################
 		### MANAGEMENT ###
 		##################
 
-		$this->AuthenticateManagement ();
+		$FiskalyManagement = new FiskalyManagement($this->managedApiKey, $this->managedApiSecret);
 
-		if ($deleteOrganization && empty($this->organizationId)) {
-			throw new Exception('Delete organization flag is set to true, but no organization ID is available to delete.');
-		}
+		$FiskalyManagement->Authenticate ();
 
-		if ($deleteOrganization) {
+		if (!empty($this->organizationId)) {
 
-			$this->Print ('Delete Organization');
-			$this->DeleteOrganization ($this->organizationId);
+			$FiskalyManagement->Print ('Delete Organization');
+			$FiskalyManagement->DeleteOrganization ($this->organizationId);
 
 			$this->organizationId = '';
 			$this->apiKey         = '';
@@ -71,28 +80,26 @@ class TestClass extends Fiskaly {
 
 		}
 
-		if ($createOrganization) {
 
-			$this->Print ('Create New Organization');
-			$response = $this->CreateOrganization ($this->newOrganization);
+		$this->PrintTitle ('Create New Organization');
+		$response = $FiskalyManagement->CreateOrganization ($newOrganization);
 
-			$newOrganizationId    = $response->GetBody ()['_id'] ?? '';
-			$this->organizationId = $newOrganizationId;
+		$newOrganizationId    = $response->GetBody ()['_id'] ?? '';
+		$this->organizationId = $newOrganizationId;
 
-			$this->Print ('Create API Credentials for New Organization');
-			$response = $this->CreateApiCredentials ($this->organizationId);
+		$this->PrintTitle ('Create API Credentials for New Organization');
+		$response = $FiskalyManagement->CreateApiCredentials ($this->organizationId, $apiCredentials);
 
-			$apiKey          = $response->GetBody ()['key'] ?? '';
-			$apiSecret       = $response->GetBody ()['secret'] ?? '';
-			$this->apiKey    = $apiKey;
-			$this->apiSecret = $apiSecret;
+		$apiKey          = $response->GetBody ()['key'] ?? '';
+		$apiSecret       = $response->GetBody ()['secret'] ?? '';
+		$this->apiKey    = $apiKey;
+		$this->apiSecret = $apiSecret;
 
-			$this->ListApiCredentials ($this->organizationId);
+		$FiskalyManagement->ListApiCredentials ($this->organizationId);
 
-		}
 
-		$this->Print ('List Organizations');
-		$this->ListOrganizations ();
+		$this->PrintTitle ('List Organizations');
+		$FiskalyManagement->ListOrganizations ();
 
 		/*$response = $this->OrganizationService->RetrieveOrganization ($organizationId);
 		$this->PrintResult ('Retrieve Organization', $response);*/
@@ -103,26 +110,28 @@ class TestClass extends Fiskaly {
 
 		echo "<h1>Fiskaly Sign DE Example</h1>";
 
-		$this->Print ('Authenticate Sign DE');
-		$this->AuthenticateSignDe ();
+		$FiskalySignDe = new FiskalySignDe($this->apiKey, $this->apiSecret);
+
+		$this->PrintTitle ('Authenticate Sign DE');
+		$FiskalySignDe->Authenticate ();
 
 		if (!empty($this->adminPuk) && !empty($this->tssId)) {
-			$this->Print ('Change Admin Pin');
-			$this->ChangeAdminPin ($this->tssId);
+			$this->PrintTitle ('Change Admin Pin');
+			$FiskalySignDe->ChangeAdminPin ($this->tssId);
 		}
 
-		if ($createTSE && empty($this->tssId) && empty($this->adminPuk)) {
+		if (empty($this->tssId) && empty($this->adminPuk)) {
 
 			$this->tssId    = Uuid::V4 ();
 			$this->clientId = Uuid::V4 ();
 			$this->txId     = Uuid::V4 ();
 
-			$this->Print ('Create TSE');
-			$response = $this->CreateTss ($this->tssId);
+			$this->PrintTitle ('Create TSE');
+			$response = $FiskalySignDe->CreateTss ($this->tssId);
 
 			// Admin PUK will be created only in CreateTss. Please note to safe it, because it is needed to change the default admin pin and to authenticate as admin. It will not be shown again after CreateTss.
-			$this->adminPuk = $response['admin_puk'] ?? null;
-			if (empty($this->adminPuk)) {
+			$FiskalySignDe->adminPuk = $response['admin_puk'] ?? null;
+			if (empty($FiskalySignDe->adminPuk)) {
 				throw new Exception('Admin PUK not found in CreateTss response. Please check the response and ensure that the TSS was created successfully.');
 			}
 
@@ -132,23 +141,23 @@ class TestClass extends Fiskaly {
 			$state = $response['state'] ?? null;
 			if ($state === 'CREATED') {
 
-				$this->Print ('Set TSE to Uninitialized');
-				$response = $this->SetUninitialized ($this->tssId);
+				$this->PrintTitle ('Set TSE to Uninitialized');
+				$response = $FiskalySignDe->SetUninitialized ($this->tssId);
 				$state    = $response['state'] ?? null;
 
-				$this->Print ('Change Admin Pin');
-				$this->ChangeAdminPin ($this->tssId);
+				$this->PrintTitle ('Change Admin Pin');
+				$FiskalySignDe->ChangeAdminPin ($this->tssId, $newAdminPin);
 
 				if ($state === 'UNINITIALIZED') {
 
-					$this->Print ('Set TSE to Initialized');
-					$this->SetInitialized ($this->tssId);
+					$this->PrintTitle ('Set TSE to Initialized');
+					$FiskalySignDe->SetInitialized ($this->tssId);
 
-					$this->Print ('Create Client for TSE');
-					$this->CreateClient ($this->tssId, $this->clientId);
+					$this->PrintTitle ('Create Client for TSE');
+					$FiskalySignDe->CreateClient ($this->tssId, $this->clientId);
 
-					$this->Print ('Logout Admin');
-					$this->LogoutAdmin ($this->tssId);
+					$this->PrintTitle ('Logout Admin');
+					$FiskalySignDe->LogoutAdmin ($this->tssId);
 
 				} else {
 					throw new Exception('Failed to set TSE to uninitialized state. Current state: ' . $state);
@@ -163,7 +172,7 @@ class TestClass extends Fiskaly {
 
 		}
 
-		$this->Print ('Start Transaction');
+		$this->PrintTitle ('Start Transaction');
 
 		$receipt = new Receipt();
 		$receipt->SetReceiptType (Receipt::TYPE_RECEIPT);
@@ -176,16 +185,16 @@ class TestClass extends Fiskaly {
 			'sales_invoice_document_id' => 'SI-' . rand (1000, 9999),
 		];
 
-		$started = $this->StartTransaction ($this->tssId, $this->txId, $this->clientId, $receipt->ToSchemaArray (), $metadata, 1);
+		$started = $FiskalySignDe->StartTransaction ($this->tssId, $this->txId, $this->clientId, $receipt->ToSchemaArray (), $metadata, 1);
 
-		$this->Print ('Finish Transaction');
+		$this->PrintTitle ('Finish Transaction');
 		$revision = $started['latest_revision'] ?? null;
 		$revision = (int)$revision + 1;
-		$this->FinishTransaction ($this->tssId, $this->txId, $this->clientId, $receipt->ToSchemaArray (), $metadata, $revision);
+		$FiskalySignDe->FinishTransaction ($this->tssId, $this->txId, $this->clientId, $receipt->ToSchemaArray (), $metadata, $revision);
 
-		if ($deleteNewOrganisationAfterwards && !empty($this->organizationId)) {
-			$this->Print ('Delete New Organization Created in Example');
-			$this->DeleteOrganization ($this->organizationId);
+		if (!empty($this->organizationId)) {
+			$this->PrintTitle ('Delete New Organization Created in Example');
+			$FiskalyManagement->DeleteOrganization ($this->organizationId);
 		}
 
 	}
@@ -199,29 +208,10 @@ class TestClass extends Fiskaly {
 	 *
 	 * @return void
 	 */
-	private function Print ($title): void {
+	private function PrintTitle ($title): void {
 		echo '<h3>' . $title . '</h3>';
 	}
 
-	/**
-	 * @param Exception $e
-	 *
-	 * @return void
-	 */
-	public static function HandleError (Exception $e): void {
-
-		echo '<div style="color: red;">';
-		echo 'Error: ' . $e->getMessage ();
-		echo '</div>';
-		echo '<div style="color: orangered;">';
-		echo 'In file: ' . $e->getFile () . ' line: ' . $e->getLine ();
-		echo '</div>';
-		echo 'Stack trace: <pre>' . $e->getTraceAsString () . '</pre>';
-
-		/*echo "<pre>";
-		print_r ($e);
-		echo "</pre>";*/
-	}
 
 	#endregion
 

@@ -8,7 +8,7 @@ use DD\Fiskaly\Http\AuthenticatedHttpClient;
 use DD\Fiskaly\Http\Response;
 use Random\RandomException;
 
-class UserService extends AbstractService {
+final class UserService extends AbstractService {
 
 	/**
 	 * @param AuthenticatedHttpClient $client

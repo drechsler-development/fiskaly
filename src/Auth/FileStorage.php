@@ -9,7 +9,7 @@ use DD\Fiskaly\Exception\FileNotFoundException;
 use DD\Fiskaly\Exception\FiskalyException;
 use Exception;
 
-readonly class FileStorage implements IStorageInterface {
+final class FileStorage implements IStorageInterface {
 
 	private string $filePath;
 

@@ -9,6 +9,7 @@ use DD\Fiskaly\Http\Response;
 use Random\RandomException;
 
 abstract class AbstractService {
+
 	protected AuthenticatedHttpClient $httpClient;
 
 	public function __construct (AuthenticatedHttpClient $client) {
