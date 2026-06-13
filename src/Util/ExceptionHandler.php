@@ -13,8 +13,16 @@ class ExceptionHandler {
 	 */
 	public static function HandleError (Exception $e): void {
 
+		$errorCode = method_exists ($e, 'GetErrorCode') ? $e->GetErrorCode () : 'N/A';
+
 		echo '<div style="color: red;">';
-		echo 'Error: ' . $e->getMessage ();
+		echo 'ErrorMessage: ' . $e->getMessage ();
+		echo '</div>';
+		echo '<div style="color: red;">';
+		echo 'Code: ' . $e->getCode ();
+		echo '</div>';
+		echo '<div style="color: red;">';
+		echo 'ErrorCode: ' . $errorCode;
 		echo '</div>';
 		echo '<div style="color: orangered;">';
 		echo 'In file: ' . $e->getFile () . ' line: ' . $e->getLine ();

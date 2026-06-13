@@ -91,7 +91,8 @@ readonly class HttpClient {
 			$errorCode = null;
 
 			if (is_array ($decodedBody)) {
-				$message   = (string)($decodedBody['message'] ?? $decodedBody['error'] ?? $message);
+				$message   .= $decodedBody['message'] ?? '';
+				$message   .= $decodedBody['error'] ?? '';
 				$errorCode = isset($decodedBody['code']) ? (string)$decodedBody['code'] : null;
 			}
 

@@ -31,7 +31,7 @@ final class ClientService extends AbstractService {
 		if (!empty($metadata)) {
 			$body['metadata'] = $metadata;
 		}
-		return $this->Json ('PUT', "/api/v2/tss/$tssId/client/$clientId", $body);
+		return $this->Json ('PUT', "/tss/$tssId/client/$clientId", $body);
 	}
 
 	/**
@@ -41,7 +41,7 @@ final class ClientService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function RetrieveClient (string $tssId, string $clientId): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId/client/$clientId");
+		return $this->Json ('GET', "/tss/$tssId/client/$clientId");
 	}
 
 	/**
@@ -57,7 +57,7 @@ final class ClientService extends AbstractService {
 		if (!empty($metadata)) {
 			$body['metadata'] = $metadata;
 		}
-		return $this->Json ('PATCH', "/api/v2/tss/$tssId/client/$clientId", $body);
+		return $this->Json ('PATCH', "/tss/$tssId/client/$clientId", $body);
 	}
 
 	/**
@@ -89,7 +89,7 @@ final class ClientService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function ListClients (string $tssId, array $query = []): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId/client", null, $query);
+		return $this->Json ('GET', "/tss/$tssId/client", null, $query);
 	}
 
 	/**
@@ -98,7 +98,7 @@ final class ClientService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function ListAllClients (array $query = []): array {
-		return $this->Json ('GET', '/api/v2/client', null, $query);
+		return $this->Json ('GET', '/client', null, $query);
 	}
 
 	/**
@@ -108,7 +108,7 @@ final class ClientService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function RetrieveMetadata (string $tssId, string $clientId): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId/client/$clientId/metadata");
+		return $this->Json ('GET', "/tss/$tssId/client/$clientId/metadata");
 	}
 
 	/**
@@ -119,7 +119,7 @@ final class ClientService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function UpdateMetadata (string $tssId, string $clientId, array $metadata): array {
-		return $this->Json ('PATCH', "/api/v2/tss/$tssId/client/$clientId/metadata", ['metadata' => $metadata]);
+		return $this->Json ('PATCH', "/tss/$tssId/client/$clientId/metadata", ['metadata' => $metadata]);
 	}
 
 }

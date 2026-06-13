@@ -8,7 +8,7 @@ use InvalidArgumentException;
 
 final class Configuration {
 
-	public const string DEFAULT_BASE_URL_SIGN_DE    = 'https://kassensichv-middleware.fiskaly.com';
+	public const string DEFAULT_BASE_URL_SIGN_DE    = 'https://kassensichv-middleware.fiskaly.com/api/v2';
 	public const string DEFAULT_BASE_URL_MANAGEMENT = 'https://dashboard.fiskaly.com/api/v0';
 
 	public string $baseUrl;

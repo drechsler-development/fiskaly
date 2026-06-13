@@ -28,7 +28,7 @@ final class AdminService extends AbstractService {
 	public function AuthenticateAdmin (string $tssId, string $adminPin): array {
 
 		$body = ['admin_pin' => $adminPin];
-		return $this->Json ('POST', "/api/v2/tss/$tssId/admin/auth", $body);
+		return $this->Json ('POST', "/tss/$tssId/admin/auth", $body);
 
 	}
 
@@ -40,7 +40,7 @@ final class AdminService extends AbstractService {
 	 */
 	public function LogoutAdmin (string $tssId): array {
 
-		return $this->Json ('POST', "/api/v2/tss/$tssId/admin/logout", []);
+		return $this->Json ('POST', "/tss/$tssId/admin/logout", []);
 
 	}
 
@@ -59,7 +59,7 @@ final class AdminService extends AbstractService {
 			'new_admin_pin' => $newAdminPin,
 		];
 
-		return $this->Json ('PATCH', "/api/v2/tss/$tssId/admin", $body);
+		return $this->Json ('PATCH', "/tss/$tssId/admin", $body);
 
 	}
 }

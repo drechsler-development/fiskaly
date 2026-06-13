@@ -87,7 +87,7 @@ final class TransactionService extends AbstractService {
 	public function UpsertTransaction (string $tssId, string $txIdOrNumber, array $body, ?int $txRevision = null): array {
 		$body  = array_filter ($body, static fn($value): bool => $value !== null && $value !== []);
 		$query = $txRevision !== null ? ['tx_revision' => $txRevision] : [];
-		return $this->Json ('PUT', "/api/v2/tss/$tssId/tx/$txIdOrNumber", $body, $query);
+		return $this->Json ('PUT', "/tss/$tssId/tx/$txIdOrNumber", $body, $query);
 	}
 
 	/**
@@ -98,7 +98,7 @@ final class TransactionService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function RetrieveTransaction (string $tssId, string $txIdOrNumber, array $query = []): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId/tx/$txIdOrNumber", null, $query);
+		return $this->Json ('GET', "/tss/$tssId/tx/$txIdOrNumber", null, $query);
 	}
 
 	/**
@@ -109,7 +109,7 @@ final class TransactionService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function RetrieveTransactionLog (string $tssId, string $txIdOrNumber, array $query = []): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId/tx/$txIdOrNumber/log", null, $query);
+		return $this->Json ('GET', "/tss/$tssId/tx/$txIdOrNumber/log", null, $query);
 	}
 
 	/**
@@ -119,7 +119,7 @@ final class TransactionService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function ListTransactions (string $tssId, array $query = []): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId/tx", null, $query);
+		return $this->Json ('GET', "/tss/$tssId/tx", null, $query);
 	}
 
 	/**
@@ -128,7 +128,7 @@ final class TransactionService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function ListAllTransactions (array $query = []): array {
-		return $this->Json ('GET', '/api/v2/tx', null, $query);
+		return $this->Json ('GET', '/tx', null, $query);
 	}
 
 	/**
@@ -139,7 +139,7 @@ final class TransactionService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function ListClientTransactions (string $tssId, string $clientId, array $query = []): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId/client/$clientId/tx", null, $query);
+		return $this->Json ('GET', "/tss/$tssId/client/$clientId/tx", null, $query);
 	}
 
 	/**
@@ -149,7 +149,7 @@ final class TransactionService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function RetrieveMetadata (string $tssId, string $txIdOrNumber): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId/tx/$txIdOrNumber/metadata");
+		return $this->Json ('GET', "/tss/$tssId/tx/$txIdOrNumber/metadata");
 	}
 
 	/**
@@ -160,7 +160,7 @@ final class TransactionService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function UpdateMetadata (string $tssId, string $txIdOrNumber, array $metadata): array {
-		return $this->Json ('PATCH', "/api/v2/tss/$tssId/tx/$txIdOrNumber/metadata", ['metadata' => $metadata]);
+		return $this->Json ('PATCH', "/tss/$tssId/tx/$txIdOrNumber/metadata", ['metadata' => $metadata]);
 	}
 
 }

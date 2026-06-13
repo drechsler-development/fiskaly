@@ -23,7 +23,7 @@ final class TssService extends AbstractService {
 	 * @throws RandomException	 */
 	public function CreateTss (string $tssId, array $metadata = []): array {
 		$body = empty($metadata) ? [] : ['metadata' => $metadata];
-		return $this->Json ('PUT', "/api/v2/tss/$tssId", $body);
+		return $this->Json ('PUT', "/tss/$tssId", $body);
 	}
 
 	/**
@@ -32,7 +32,7 @@ final class TssService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function RetrieveTss (string $tssId): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId");
+		return $this->Json ('GET', "/tss/$tssId");
 	}
 
 	/**
@@ -51,7 +51,7 @@ final class TssService extends AbstractService {
 		if (!empty($metadata)) {
 			$body['metadata'] = $metadata;
 		}
-		return $this->Json ('PATCH', "/api/v2/tss/$tssId", $body);
+		return $this->Json ('PATCH', "/tss/$tssId", $body);
 	}
 
 	/**
@@ -90,7 +90,7 @@ final class TssService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function ListTss (array $query = []): array {
-		return $this->Json ('GET', '/api/v2/tss', null, $query);
+		return $this->Json ('GET', '/tss', null, $query);
 	}
 
 	/**
@@ -99,7 +99,7 @@ final class TssService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function RetrieveMetadata (string $tssId): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId/metadata");
+		return $this->Json ('GET', "/tss/$tssId/metadata");
 	}
 
 	/**
@@ -109,7 +109,7 @@ final class TssService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function UpdateMetadata (string $tssId, array $metadata): array {
-		return $this->Json ('PATCH', "/api/v2/tss/$tssId/metadata", ['metadata' => $metadata]);
+		return $this->Json ('PATCH', "/tss/$tssId/metadata", ['metadata' => $metadata]);
 	}
 
 }

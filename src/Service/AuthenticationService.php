@@ -10,7 +10,7 @@ use Random\RandomException;
 
 final class AuthenticationService
 {
-	public string $path;
+	CONST string PATH_AUTH = '/auth';
 
 	private HttpClient        $httpClient;
     private IStorageInterface $tokenStorage;
@@ -20,12 +20,10 @@ final class AuthenticationService
 	 * @param IStorageInterface $tokenStorage
 	 * @param string            $apiName
 	 */
-	public function __construct(HttpClient $httpClient, IStorageInterface $tokenStorage, string $apiName) {
+	public function __construct(HttpClient $httpClient, IStorageInterface $tokenStorage) {
 
 		$this->httpClient = $httpClient;
 		$this->tokenStorage = $tokenStorage;
-
-		$this->path = $apiName === 'management' ? '/auth' : '/api/v2/auth';
 
 	}
 
@@ -38,7 +36,7 @@ final class AuthenticationService
 	 */
     public function AuthenticateWithApiKey(string $apiKey, string $apiSecret): array
     {
-        $response = $this->httpClient->Request('POST', $this->path, [
+        $response = $this->httpClient->Request('POST', self::PATH_AUTH, [
             'api_key' => $apiKey,
             'api_secret' => $apiSecret,
         ]);
@@ -54,22 +52,22 @@ final class AuthenticationService
 	 * @return array
 	 * @throws RandomException
 	 */
-    public function AuthenticateWithRefreshToken(string $refreshToken): array
+    /*public function AuthenticateWithRefreshToken(string $refreshToken): array
     {
-        $response = $this->httpClient->Request('POST', $this->path, [
+        $response = $this->httpClient->Request('POST', self::PATH_AUTH, [
             'refresh_token' => $refreshToken,
         ]);
 
         $body = $response->GetBody();
         $this->tokenStorage->SetTokenData(is_array($body) ? $body : []);
         return is_array($body) ? $body : [];
-    }
+    }*/
 
 	/**
 	 * @return array
 	 * @throws RandomException
 	 */
-    public function RefreshFromStorage(): array
+    /*public function RefreshFromStorage(): array
     {
         $tokenData = $this->tokenStorage->GetTokenData();
         $refreshToken = $tokenData['refresh_token'] ?? null;
@@ -79,7 +77,7 @@ final class AuthenticationService
         }
 
         return $this->AuthenticateWithRefreshToken($refreshToken);
-    }
+    }*/
 
 	/**
 	 * @return void

@@ -24,7 +24,7 @@ final class ExportService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function TriggerExport (string $tssId, string $exportId, array $query = []): array {
-		return $this->Json ('PUT', "/api/v2/tss/$tssId/export/$exportId", [], $query);
+		return $this->Json ('PUT', "/tss/$tssId/export/$exportId", [], $query);
 	}
 
 	/**
@@ -34,7 +34,7 @@ final class ExportService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function RetrieveExport (string $tssId, string $exportId): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId/export/$exportId");
+		return $this->Json ('GET', "/tss/$tssId/export/$exportId");
 	}
 
 	/**
@@ -44,7 +44,7 @@ final class ExportService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function CancelExport (string $tssId, string $exportId): array {
-		return $this->Json ('DELETE', "/api/v2/tss/$tssId/export/$exportId");
+		return $this->Json ('DELETE', "/tss/$tssId/export/$exportId");
 	}
 
 	/**
@@ -54,7 +54,7 @@ final class ExportService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function ListExports (string $tssId, array $query = []): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId/export", null, $query);
+		return $this->Json ('GET', "/tss/$tssId/export", null, $query);
 	}
 
 	/**
@@ -63,7 +63,7 @@ final class ExportService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function ListAllExports (array $query = []): array {
-		return $this->Json ('GET', '/api/v2/export', null, $query);
+		return $this->Json ('GET', '/export', null, $query);
 	}
 
 	/**
@@ -74,7 +74,7 @@ final class ExportService extends AbstractService {
 	 * @throws RandomException
 	 */
 	public function RetrieveExportFile (string $tssId, string $exportId): string {
-		$body = $this->httpClient->RequestRaw ('GET', "/api/v2/tss/$tssId/export/$exportId/file")->GetRawBody ();
+		$body = $this->httpClient->RequestRaw ('GET', "/tss/$tssId/export/$exportId/file")->GetRawBody ();
 		return $body ?? '';
 	}
 
@@ -103,7 +103,7 @@ final class ExportService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function RetrieveMetadata (string $tssId, string $exportId): array {
-		return $this->Json ('GET', "/api/v2/tss/$tssId/export/$exportId/metadata");
+		return $this->Json ('GET', "/tss/$tssId/export/$exportId/metadata");
 	}
 
 	/**
@@ -114,7 +114,7 @@ final class ExportService extends AbstractService {
 	 * @return array
 	 * @throws RandomException	 */
 	public function UpdateMetadata (string $tssId, string $exportId, array $metadata): array {
-		return $this->Json ('PATCH', "/api/v2/tss/$tssId/export/$exportId/metadata", ['metadata' => $metadata]);
+		return $this->Json ('PATCH', "/tss/$tssId/export/$exportId/metadata", ['metadata' => $metadata]);
 	}
 
 }

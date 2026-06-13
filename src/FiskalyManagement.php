@@ -30,9 +30,6 @@ class FiskalyManagement extends FiskalyBase {
 	private UserService           $UserService;
 	private BillingAddressService $BillingAddressService;
 
-	private string $apiKey;
-	private string $apiSecret;
-
 	private string  $managedApiKey;
 	private string  $managedApiSecret;
 	private ?string $organizationId;
@@ -59,7 +56,7 @@ class FiskalyManagement extends FiskalyBase {
 		$configuration                 = new Configuration(Configuration::DEFAULT_BASE_URL_MANAGEMENT);
 		$this->HttpClient              = new HttpClient($configuration);
 		$this->AuthenticatedHttpClient = new AuthenticatedHttpClient($configuration, $tokenStorage);
-		$this->AuthenticationService   = new AuthenticationService($this->HttpClient, $tokenStorage, 'management');
+		$this->AuthenticationService   = new AuthenticationService($this->HttpClient, $tokenStorage);
 		$this->OrganizationService     = new OrganizationService($this->AuthenticatedHttpClient);
 		$this->ApiKeyService           = new ApiKeyService($this->AuthenticatedHttpClient);
 		$this->UserService             = new UserService($this->AuthenticatedHttpClient);
@@ -113,7 +110,7 @@ class FiskalyManagement extends FiskalyBase {
 		}
 
 		$response = $this->AuthenticationService ()->AuthenticateWithApiKey ($this->managedApiKey, $this->managedApiSecret);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('AuthenticateManagement Info', $response);
 		}
 	}
@@ -130,7 +127,7 @@ class FiskalyManagement extends FiskalyBase {
 
 		$response = $this->OrganizationService->ListOrganizations ($this->listOrganizationFilter);
 
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('List Organizations Response', $response);
 		}
 
@@ -149,7 +146,7 @@ class FiskalyManagement extends FiskalyBase {
 
 		$response = $this->ApiKeyService ()->ListApiKeys ($organizationId);
 
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('List API Credentials', $response);
 		}
 
@@ -167,7 +164,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function RetrieveOrganization ($organizationId): Response {
 
 		$response = $this->OrganizationService->RetrieveOrganization ($organizationId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Retrieve Organization', $response);
 		}
 
@@ -186,7 +183,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function UpdateOrganization ($organizationId, array $data): Response {
 
 		$response = $this->OrganizationService->UpdateOrganization ($organizationId, $data);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Update Organization', $response);
 		}
 
@@ -205,7 +202,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function EnableEnvironment ($organizationId, string $env = 'TEST'): Response {
 
 		$response = $this->OrganizationService->EnableEnvironment ($organizationId, $env);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Enable Environment', $response);
 		}
 
@@ -224,7 +221,7 @@ class FiskalyManagement extends FiskalyBase {
 
 		$response = $this->OrganizationService->DeleteOrganization ($organizationId);
 
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Delete Organization Response', $response);
 		}
 
@@ -243,7 +240,7 @@ class FiskalyManagement extends FiskalyBase {
 
 		$response = $this->OrganizationService->CreateOrganization ($organisation ?? $this->newOrganization);
 
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Create New Organization Response', $response);
 		}
 
@@ -255,7 +252,8 @@ class FiskalyManagement extends FiskalyBase {
 	/**
 	 * Create new API credentials for a specific organization by its ID.
 	 *
-	 * @param $organizationId
+	 * @param string $organizationId
+	 * @param array  $apiCredentials
 	 *
 	 * @return Response
 	 * @throws RandomException
@@ -268,7 +266,7 @@ class FiskalyManagement extends FiskalyBase {
 
 		$response = $this->ApiKeyService ()->CreateApiKey ($organizationId, $this->newApiCredentials);
 
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Create API Credentials Response', $response);
 		}
 
@@ -287,7 +285,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function RetrieveApiCredentials ($organizationId, $keyId): Response {
 
 		$response = $this->ApiKeyService ()->RetrieveApiKey ($organizationId, $keyId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Retrieve API Credentials', $response);
 		}
 
@@ -307,7 +305,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function UpdateApiCredentials ($organizationId, $keyId, array $data): Response {
 
 		$response = $this->ApiKeyService ()->UpdateApiKey ($organizationId, $keyId, $data);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Update API Credentials', $response);
 		}
 
@@ -326,7 +324,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function DeleteApiCredentials ($organizationId, $keyId): Response {
 
 		$response = $this->ApiKeyService ()->DeleteApiKey ($organizationId, $keyId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Delete API Credentials', $response);
 		}
 
@@ -347,7 +345,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function ListUsers ($organizationId, array $filter = []): Response {
 
 		$response = $this->UserService ()->ListUsers ($organizationId, $filter);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('List Users', $response);
 		}
 
@@ -368,7 +366,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function InviteUser ($organizationId, string $email, ?string $firstName = null, ?string $lastName = null): Response {
 
 		$response = $this->UserService ()->InviteUser ($organizationId, $email, $firstName, $lastName);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Invite User', $response);
 		}
 
@@ -387,7 +385,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function DeleteUser ($organizationId, $userId): Response {
 
 		$response = $this->UserService ()->DeleteUser ($organizationId, $userId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Delete User', $response);
 		}
 
@@ -405,7 +403,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function ListBillingAddresses (): Response {
 
 		$response = $this->BillingAddressService ()->ListBillingAddresses ();
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('List Billing Addresses', $response);
 		}
 
@@ -423,7 +421,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function CreateBillingAddress (array $data): Response {
 
 		$response = $this->BillingAddressService ()->CreateBillingAddress ($data);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Create Billing Address', $response);
 		}
 
@@ -441,7 +439,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function RetrieveBillingAddress (string $addressId): Response {
 
 		$response = $this->BillingAddressService ()->RetrieveBillingAddress ($addressId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Retrieve Billing Address', $response);
 		}
 
@@ -460,7 +458,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function UpdateBillingAddress (string $addressId, array $data): Response {
 
 		$response = $this->BillingAddressService ()->UpdateBillingAddress ($addressId, $data);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Update Billing Address', $response);
 		}
 
@@ -478,7 +476,7 @@ class FiskalyManagement extends FiskalyBase {
 	public function DeleteBillingAddress (string $addressId): Response {
 
 		$response = $this->BillingAddressService ()->DeleteBillingAddress ($addressId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Delete Billing Address', $response);
 		}
 

@@ -33,9 +33,8 @@ class FiskalySignDe extends FiskalyBase {
 	private ?string $apiKey;
 	private ?string $apiSecret;
 
-	public string $clientSerialNumber;
-	public string $adminPin;
-	public string $adminPuk;
+	public string $adminPin = '';
+	public string $adminPuk = '';
 
 	/**
 	 * @param string            $apiKey
@@ -46,10 +45,10 @@ class FiskalySignDe extends FiskalyBase {
 	 */
 	public function __construct (string $apiKey, string $apiSecret, IStorageInterface $tokenStorage = new SessionStorage()) {
 
-		$configuration                 = new Configuration(Configuration::DEFAULT_BASE_URL_MANAGEMENT);
+		$configuration                 = new Configuration(Configuration::DEFAULT_BASE_URL_SIGN_DE);
 		$this->httpClient              = new HttpClient($configuration);
 		$this->authenticatedHttpClient = new AuthenticatedHttpClient($configuration, $tokenStorage);
-		$this->authenticationService   = new AuthenticationService($this->httpClient, $tokenStorage, 'sign_de');
+		$this->authenticationService   = new AuthenticationService($this->httpClient, $tokenStorage);
 
 		$this->adminService       = new AdminService($this->authenticatedHttpClient);
 		$this->tssService         = new TssService($this->authenticatedHttpClient);
@@ -60,9 +59,8 @@ class FiskalySignDe extends FiskalyBase {
 		$this->apiKey    = $apiKey;
 		$this->apiSecret = $apiSecret;
 
-		if (!empty($this->apiKey) && !empty($this->apiSecret)) {
-			$this->authenticationService->AuthenticateWithApiKey ($this->apiKey, $this->apiSecret);
-		}
+		$this->authenticationService->AuthenticateWithApiKey ($this->apiKey, $this->apiSecret);
+
 	}
 
 	#region GETTER
@@ -103,7 +101,7 @@ class FiskalySignDe extends FiskalyBase {
 	 */
 	public function Authenticate (): void {
 		$response = $this->AuthenticationService ()->AuthenticateWithApiKey ($this->apiKey, $this->apiSecret);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('AuthenticateSignDe Info', $response);
 		}
 	}
@@ -122,7 +120,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$response = $this->AdminService ()->AuthenticateAdmin ($tssId, $this->adminPin);
 
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Authenticate Admin', ['success' => empty($response)]);
 		}
 	}
@@ -131,18 +129,21 @@ class FiskalySignDe extends FiskalyBase {
 	 * Change the admin PIN for the specified TSS ID using the stored admin PUK and new admin PIN.
 	 *
 	 * @param string $tssId The ID of the TSS for which to change the admin PIN.
+	 * @param string $newAdminPin
 	 *
 	 * @return void
-	 * @throws Exception if changing the admin PIN fails
+	 * @throws RandomException
 	 */
 	public function ChangeAdminPin (string $tssId, string $newAdminPin): void {
 
 		//$this->AuthenticateAdmin ($tssId);
 
 		$response = $this->AdminService ()->ChangeAdminPin ($tssId, $this->adminPuk, $newAdminPin);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Change Admin Pin', ['success' => empty($response)]);
 		}
+
+		$this->adminPin = $newAdminPin;
 
 	}
 
@@ -159,7 +160,7 @@ class FiskalySignDe extends FiskalyBase {
 	public function ChangeAdminPinWithPuk (string $tssId, string $adminPuk, string $newPin): void {
 
 		$response = $this->AdminService ()->ChangeAdminPin ($tssId, $adminPuk, $newPin);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Change Admin Pin', $response);
 		}
 
@@ -177,7 +178,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$response = $this->AdminService ()->LogoutAdmin ($tssId);
 
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Logout Admin', $response);
 		}
 	}
@@ -197,7 +198,7 @@ class FiskalySignDe extends FiskalyBase {
 		$this->AuthenticateAdmin ($tssId);
 
 		$response = $this->TssService ()->RetrieveTss ($tssId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Retrieve TSE Info', $response);
 		}
 
@@ -218,7 +219,7 @@ class FiskalySignDe extends FiskalyBase {
 			'internal_reference' => 'vabs-test-tss',
 		]);
 
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Create TSE Response', $response);
 		}
 
@@ -237,7 +238,7 @@ class FiskalySignDe extends FiskalyBase {
 	public function SetUninitialized (string $tssId): array {
 
 		$response = $this->TssService ()->SetUninitialized ($tssId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Set TSE Uninitialized', $response);
 		}
 
@@ -257,7 +258,7 @@ class FiskalySignDe extends FiskalyBase {
 		$this->AuthenticateAdmin ($tssId);
 
 		$response = $this->TssService ()->SetInitialized ($tssId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Set TSE Initialized', $response);
 		}
 	}
@@ -277,7 +278,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->TssService ()->UpdateTss ($tssId, $state, $metadata, $description);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Update TSE', $response);
 		}
 
@@ -297,7 +298,7 @@ class FiskalySignDe extends FiskalyBase {
 		$this->AuthenticateAdmin ($tssId);
 
 		$response = $this->TssService ()->DisableTss ($tssId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('TSE DisableTss', $response);
 		}
 	}
@@ -315,7 +316,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->TssService ()->ListTss ($query);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('List TSE', $response);
 		}
 
@@ -334,7 +335,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->TssService ()->RetrieveMetadata ($tssId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Retrieve TSE Metadata', $response);
 		}
 
@@ -354,7 +355,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->TssService ()->UpdateMetadata ($tssId, $metadata);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Update TSE Metadata', $response);
 		}
 
@@ -376,7 +377,7 @@ class FiskalySignDe extends FiskalyBase {
 		$this->AuthenticateAdmin ($tssId);
 
 		$response = $this->ClientService ()->ListAllClients ();
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('ListAllClients', $response);
 		}
 
@@ -396,7 +397,7 @@ class FiskalySignDe extends FiskalyBase {
 		$this->AuthenticateAdmin ($tssId);
 
 		$response = $this->ClientService ()->ListClients ($tssId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Create Client', $response);
 		}
 
@@ -412,12 +413,12 @@ class FiskalySignDe extends FiskalyBase {
 	 * @return array The response from the API after creating the client, including details of the created client.
 	 * @throws Exception if creating the client fails
 	 */
-	public function CreateClient (string $tssId, string $clientId): array {
+	public function CreateClient (string $tssId, string $clientId, string $clientSerialNumber): array {
 
 		$this->AuthenticateAdmin ($tssId);
 
-		$response = $this->ClientService ()->CreateClient ($tssId, $clientId, $this->clientSerialNumber);
-		if ($this->debugOutput) {
+		$response = $this->ClientService ()->CreateClient ($tssId, $clientId, $clientSerialNumber);
+		if ($this->debug) {
 			$this->PrintResult ('Create Client', $response);
 		}
 
@@ -437,7 +438,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ClientService ()->RetrieveClient ($tssId, $clientId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Retrieve Client', $response);
 		}
 
@@ -457,7 +458,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ClientService ()->RegisterClient ($tssId, $clientId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Register Client', $response);
 		}
 
@@ -478,7 +479,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ClientService ()->DeregisterClient ($tssId, $clientId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Deregister Client', $response);
 		}
 
@@ -498,7 +499,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ClientService ()->RetrieveMetadata ($tssId, $clientId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Retrieve Client Metadata', $response);
 		}
 
@@ -519,7 +520,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ClientService ()->UpdateMetadata ($tssId, $clientId, $metadata);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Update Client Metadata', $response);
 		}
 
@@ -544,7 +545,7 @@ class FiskalySignDe extends FiskalyBase {
 	public function StartTransaction (string $tssId, string $txId, string $clientId, array $schema = [], array $metadata = [], int $txRevision = 1): array {
 
 		$response = $this->TransactionService ()->StartTransaction ($tssId, $txId, $clientId, $schema, $metadata, $txRevision);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Start Transaction', $response);
 		}
 
@@ -567,7 +568,7 @@ class FiskalySignDe extends FiskalyBase {
 	public function FinishTransaction (string $tssId, string $txIdOrNumber, string $clientId, array $schema, array $metadata = [], ?int $txRevision = null): array {
 
 		$response = $this->TransactionService ()->FinishTransaction ($tssId, $txIdOrNumber, $clientId, $schema, $metadata, $txRevision);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Finish Transaction', $response);
 		}
 
@@ -590,7 +591,7 @@ class FiskalySignDe extends FiskalyBase {
 	public function CancelTransaction (string $tssId, string $txIdOrNumber, string $clientId, array $schema = [], array $metadata = [], ?int $txRevision = null): array {
 
 		$response = $this->TransactionService ()->CancelTransaction ($tssId, $txIdOrNumber, $clientId, $schema, $metadata, $txRevision);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Cancel Transaction', $response);
 		}
 
@@ -610,7 +611,7 @@ class FiskalySignDe extends FiskalyBase {
 	public function RetrieveTransaction (string $tssId, string $txIdOrNumber, array $query = []): array {
 
 		$response = $this->TransactionService ()->RetrieveTransaction ($tssId, $txIdOrNumber, $query);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Retrieve Transaction', $response);
 		}
 
@@ -630,7 +631,7 @@ class FiskalySignDe extends FiskalyBase {
 	public function RetrieveTransactionLog (string $tssId, string $txIdOrNumber, array $query = []): array {
 
 		$response = $this->TransactionService ()->RetrieveTransactionLog ($tssId, $txIdOrNumber, $query);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Retrieve Transaction Log', $response);
 		}
 
@@ -649,7 +650,7 @@ class FiskalySignDe extends FiskalyBase {
 	public function ListTransactions (string $tssId, array $query = []): array {
 
 		$response = $this->TransactionService ()->ListTransactions ($tssId, $query);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('List Transactions', $response);
 		}
 
@@ -667,7 +668,7 @@ class FiskalySignDe extends FiskalyBase {
 	public function ListAllTransactions (array $query = []): array {
 
 		$response = $this->TransactionService ()->ListAllTransactions ($query);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('List All Transactions', $response);
 		}
 
@@ -687,7 +688,7 @@ class FiskalySignDe extends FiskalyBase {
 	public function ListClientTransactions (string $tssId, string $clientId, array $query = []): array {
 
 		$response = $this->TransactionService ()->ListClientTransactions ($tssId, $clientId, $query);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('List Client Transactions', $response);
 		}
 
@@ -706,7 +707,7 @@ class FiskalySignDe extends FiskalyBase {
 	public function RetrieveTransactionMetadata (string $tssId, string $txIdOrNumber): array {
 
 		$response = $this->TransactionService ()->RetrieveMetadata ($tssId, $txIdOrNumber);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Retrieve Transaction Metadata', $response);
 		}
 
@@ -726,7 +727,7 @@ class FiskalySignDe extends FiskalyBase {
 	public function UpdateTransactionMetadata (string $tssId, string $txIdOrNumber, array $metadata): array {
 
 		$response = $this->TransactionService ()->UpdateMetadata ($tssId, $txIdOrNumber, $metadata);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Update Transaction Metadata', $response);
 		}
 
@@ -749,7 +750,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ExportService ()->TriggerExport ($tssId, $exportId, $query);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Trigger Export', $response);
 		}
 
@@ -769,7 +770,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ExportService ()->RetrieveExport ($tssId, $exportId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Retrieve Export', $response);
 		}
 
@@ -789,7 +790,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ExportService ()->CancelExport ($tssId, $exportId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Cancel Export', $response);
 		}
 
@@ -809,7 +810,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ExportService ()->ListExports ($tssId, $query);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('List Exports', $response);
 		}
 
@@ -829,7 +830,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ExportService ()->ListAllExports ($query);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('List All Exports', $response);
 		}
 
@@ -849,7 +850,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ExportService ()->RetrieveMetadata ($tssId, $exportId);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Retrieve Export Metadata', $response);
 		}
 
@@ -870,7 +871,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ExportService ()->UpdateMetadata ($tssId, $exportId, $metadata);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Update Export Metadata', $response);
 		}
 
@@ -891,7 +892,7 @@ class FiskalySignDe extends FiskalyBase {
 
 		$this->AuthenticateAdmin ($tssId);
 		$response = $this->ExportService ()->SaveExportFile ($tssId, $exportId, $targetFile);
-		if ($this->debugOutput) {
+		if ($this->debug) {
 			$this->PrintResult ('Save Export File', ['path' => $response]);
 		}
 

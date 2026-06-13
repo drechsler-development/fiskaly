@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DD\Fiskaly\Examples;
 
-use DD\Fiskaly\FiskalyBase;
 use DD\Fiskaly\FiskalyManagement;
 use DD\Fiskaly\FiskalySignDe;
 use DD\Fiskaly\Transaction\PaymentAmount;
@@ -20,63 +19,70 @@ use Random\RandomException;
  * Please ensure to replace the placeholder API credentials with your actual test credentials before running the example.
  * Note: This example is for demonstration purposes only and may not cover all edge cases or error handling scenarios. It is recommended to implement additional error handling and validation as needed for production use.
  */
-class TestClass extends FiskalyBase {
+class TestClass {
 
-	public string $tssId          = '';
-	public string $clientId       = '';
-	public string $txId           = '';
-	public string $organizationId = '';
+	public string $tssId                 = '';
+	public string $clientSerialNumber    = '';
+	public string $clientId;
+	public string $txId                  = '';
+	public array  $deleteOrganizationIds = [];
+	public string $organizationId        = '';
+
 	public string $managedApiKey;
 	public string $managedApiSecret;
-
 	public string $apiKey;
 	public string $apiSecret;
+	public bool   $debug;
 
 	/**
 	 * @param string $managedApiKey
 	 * @param string $managedApiSecret
-	 * @param string $managedOrganizationId
+	 * @param array  $deleteOrganizationIds
 	 */
-	public function __construct (string $managedApiKey, string $managedApiSecret, string $previousOrganizationId = '') {
+	public function __construct (string $managedApiKey, string $managedApiSecret, array $deleteOrganizationIds = []) {
 
-		$this->managedApiKey    = $managedApiKey;
-		$this->managedApiSecret = $managedApiSecret;
-		$this->organizationId   = $previousOrganizationId;
+		$this->managedApiKey         = $managedApiKey;
+		$this->managedApiSecret      = $managedApiSecret;
+		$this->deleteOrganizationIds = $deleteOrganizationIds;
 
 	}
 
 	/**
 	 * runs a simple example of using the Fiskaly Management API and Sign DE API to manage organizations, API credentials, TSEs, and transactions.
 	 *
-	 * @param bool $deleteOrganization
-	 * @param bool $createOrganization
-	 * @param bool $createTSE
-	 * @param bool $deleteNewOrganisationAfterwards
+	 * @param array $newOrganization
+	 * @param array $apiCredentials
 	 *
 	 * @return void
 	 * @throws RandomException
 	 * @throws Exception
 	 */
-	public function Run (array $newOrganization, array $apiCredentials, string $newAdminPin = '1234567890', string $clientSerialNumber = ''): void {
+	public function Run (array $newOrganization, array $apiCredentials, bool $debug = false): void {
 
-		$this->clientId = $clientSerialNumber ?: 'KASSE-' . rand (1000, 9999);
+		$this->clientSerialNumber =  'KASSE-' . rand (1000, 9999);
+		$this->clientId = Uuid::V4 ();
+		$this->debug = $debug;
 
 		##################
 		### MANAGEMENT ###
 		##################
 
-		$FiskalyManagement = new FiskalyManagement($this->managedApiKey, $this->managedApiSecret);
+		echo "<h1>Fiskaly Management Example</h1>";
 
+		$FiskalyManagement = new FiskalyManagement($this->managedApiKey, $this->managedApiSecret);
+		$FiskalyManagement->SetDebug ($this->debug);
 		$FiskalyManagement->Authenticate ();
 
-		if (!empty($this->organizationId)) {
+		if (!empty($this->deleteOrganizationIds)) {
 
-			$FiskalyManagement->Print ('Delete Organization');
-			$FiskalyManagement->DeleteOrganization ($this->organizationId);
+			foreach ($this->deleteOrganizationIds as $organizationId) {
+				$FiskalyManagement->Print ('Delete Organization');
+				$FiskalyManagement->DeleteOrganization ($organizationId);
+			}
 
-			$this->organizationId = '';
-			$this->apiKey         = '';
-			$this->apiSecret      = '';
+			$this->deleteOrganizationIds = [];
+			$this->apiKey                = '';
+			$this->apiSecret             = '';
 
 		}
 
@@ -101,7 +107,7 @@ class TestClass extends FiskalyBase {
 		$this->PrintTitle ('List Organizations');
 		$FiskalyManagement->ListOrganizations ();
 
-		/*$response = $this->OrganizationService->RetrieveOrganization ($organizationId);
+		/*$response = $this->OrganizationService->RetrieveOrganization ($this->organizationId);
 		$this->PrintResult ('Retrieve Organization', $response);*/
 
 		###############
@@ -111,20 +117,21 @@ class TestClass extends FiskalyBase {
 		echo "<h1>Fiskaly Sign DE Example</h1>";
 
 		$FiskalySignDe = new FiskalySignDe($this->apiKey, $this->apiSecret);
+		$FiskalySignDe->SetDebug ($this->debug);
 
 		$this->PrintTitle ('Authenticate Sign DE');
 		$FiskalySignDe->Authenticate ();
 
 		if (!empty($this->adminPuk) && !empty($this->tssId)) {
 			$this->PrintTitle ('Change Admin Pin');
-			$FiskalySignDe->ChangeAdminPin ($this->tssId);
+			$FiskalySignDe->ChangeAdminPin ($this->tssId,'12345678');
 		}
 
 		if (empty($this->tssId) && empty($this->adminPuk)) {
 
-			$this->tssId    = Uuid::V4 ();
-			$this->clientId = Uuid::V4 ();
-			$this->txId     = Uuid::V4 ();
+			$this->tssId              = Uuid::V4 ();
+			$this->clientId           = Uuid::V4 ();
+			$this->txId               = Uuid::V4 ();
 
 			$this->PrintTitle ('Create TSE');
 			$response = $FiskalySignDe->CreateTss ($this->tssId);
@@ -145,16 +152,18 @@ class TestClass extends FiskalyBase {
 				$response = $FiskalySignDe->SetUninitialized ($this->tssId);
 				$state    = $response['state'] ?? null;
 
-				$this->PrintTitle ('Change Admin Pin');
-				$FiskalySignDe->ChangeAdminPin ($this->tssId, $newAdminPin);
-
 				if ($state === 'UNINITIALIZED') {
+
+					//Only if the state is uninitialized, we can continue with the ChangeAdminPin and SetInitialized steps, because these steps are only allowed in the uninitialized state. If the state is not uninitialized, it means that something went wrong in the previous step, and we cannot continue with the example, because we need a TSE in uninitialized state to continue.
+					//As forced and described in the documentation, the first thing to do after creating a TSE is to change the default admin pin, because it is not allowed to use the default admin pin for security reasons. You need the admin puk for this step, which you get in the response of CreateTss and which you should have saved, because it will not be shown again.
+					$this->PrintTitle ('Change Admin Pin');
+					$FiskalySignDe->ChangeAdminPin ($this->tssId, '12345678');
 
 					$this->PrintTitle ('Set TSE to Initialized');
 					$FiskalySignDe->SetInitialized ($this->tssId);
 
 					$this->PrintTitle ('Create Client for TSE');
-					$FiskalySignDe->CreateClient ($this->tssId, $this->clientId);
+					$FiskalySignDe->CreateClient ($this->tssId, $this->clientId, $this->clientSerialNumber);
 
 					$this->PrintTitle ('Logout Admin');
 					$FiskalySignDe->LogoutAdmin ($this->tssId);
@@ -185,7 +194,7 @@ class TestClass extends FiskalyBase {
 			'sales_invoice_document_id' => 'SI-' . rand (1000, 9999),
 		];
 
-		$started = $FiskalySignDe->StartTransaction ($this->tssId, $this->txId, $this->clientId, $receipt->ToSchemaArray (), $metadata, 1);
+		$started = $FiskalySignDe->StartTransaction ($this->tssId, $this->txId, $this->clientId, $receipt->ToSchemaArray (), $metadata);
 
 		$this->PrintTitle ('Finish Transaction');
 		$revision = $started['latest_revision'] ?? null;
