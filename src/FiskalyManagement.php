@@ -69,10 +69,9 @@ class FiskalyManagement extends FiskalyBase {
 		$this->managedApiSecret      = $managedApiSecret;
 		$this->organizationId = $organizationId;
 
-		if (!empty($this->apiKey) && !empty($this->apiSecret)) {
-			// Falls API-Credentials beim Konstruktor angegeben wurden, führe sofort Authentifizierung durch
-			$this->AuthenticationService->AuthenticateWithApiKey ($this->apiKey, $this->apiSecret);
-		}
+		// Falls API-Credentials beim Konstruktor angegeben wurden, führe sofort Authentifizierung durch
+		$this->AuthenticationService->AuthenticateWithApiKey ($this->managedApiKey, $this->managedApiSecret);
+
 	}
 
 	#region GETTER
