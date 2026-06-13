@@ -30,8 +30,11 @@ class FiskalyManagement extends FiskalyBase {
 	private UserService           $UserService;
 	private BillingAddressService $BillingAddressService;
 
-	private string  $apiKey;
-	private string  $apiSecret;
+	private string $apiKey;
+	private string $apiSecret;
+
+	private string  $managedApiKey;
+	private string  $managedApiSecret;
 	private ?string $organizationId;
 
 	public array $listOrganizationFilter = [
@@ -44,14 +47,14 @@ class FiskalyManagement extends FiskalyBase {
 	public array $newApiCredentials;
 
 	/**
-	 * @param string            $apiKey
-	 * @param string            $apiSecret
+	 * @param string            $managedApiKey
+	 * @param string            $managedApiSecret
 	 * @param IStorageInterface $tokenStorage
 	 * @param string|null       $organizationId Optional default organization id
 	 *
 	 * @throws RandomException
 	 */
-	public function __construct (string $apiKey, string $apiSecret, IStorageInterface $tokenStorage = new SessionStorage(), ?string $organizationId = null) {
+	public function __construct (string $managedApiKey, string $managedApiSecret, IStorageInterface $tokenStorage = new SessionStorage(), ?string $organizationId = null) {
 
 		$configuration                 = new Configuration(Configuration::DEFAULT_BASE_URL_MANAGEMENT);
 		$this->HttpClient              = new HttpClient($configuration);
@@ -62,8 +65,8 @@ class FiskalyManagement extends FiskalyBase {
 		$this->UserService             = new UserService($this->AuthenticatedHttpClient);
 		$this->BillingAddressService   = new BillingAddressService($this->AuthenticatedHttpClient);
 
-		$this->apiKey         = $apiKey;
-		$this->apiSecret      = $apiSecret;
+		$this->managedApiKey         = $managedApiKey;
+		$this->managedApiSecret      = $managedApiSecret;
 		$this->organizationId = $organizationId;
 
 		if (!empty($this->apiKey) && !empty($this->apiSecret)) {
