@@ -52,10 +52,10 @@ class TestClass {
 	 *
 	 * @param array $newOrganization
 	 * @param array $apiCredentials
+	 * @param bool  $debug
 	 *
 	 * @return void
 	 * @throws RandomException
-	 * @throws Exception
 	 */
 	public function Run (array $newOrganization, array $apiCredentials, bool $debug = false): void {
 
@@ -204,6 +204,31 @@ class TestClass {
 		if (!empty($this->organizationId)) {
 			$this->PrintTitle ('Delete New Organization Created in Example');
 			$FiskalyManagement->DeleteOrganization ($this->organizationId);
+		}
+
+	}
+
+	/**
+	 * @return void
+	 * @throws RandomException
+	 */
+	function DeleteOrganizations () : void {
+
+		$FiskalyManagement = new FiskalyManagement($this->managedApiKey, $this->managedApiSecret);
+		$FiskalyManagement->SetDebug (true);
+		$FiskalyManagement->Authenticate ();
+
+		if (!empty($this->deleteOrganizationIds)) {
+
+			foreach ($this->deleteOrganizationIds as $organizationId) {
+				$FiskalyManagement->Print ('Delete Organization');
+				$FiskalyManagement->DeleteOrganization ($organizationId);
+			}
+
+			$this->deleteOrganizationIds = [];
+			$this->apiKey                = '';
+			$this->apiSecret             = '';
+
 		}
 
 	}

@@ -9,7 +9,7 @@ final readonly class VatAmount {
 	const string VAT_RATE_NORMAL  = 'NORMAL';
 	const string VAT_RATE_REDUCED = 'REDUCED_1';
 	const string VAT_RATE_SPECIAL = 'SPECIAL_RATE_1';
-	const string VAT_RATE_ZERO    = 'ZERO';
+	const string VAT_RATE_NULL    = 'NULL';
 
 
 	private string           $vatRate;
@@ -21,8 +21,8 @@ final readonly class VatAmount {
 	 */
 	public function __construct (string $vatRate, string|int|float $amount) {
 
-		if(!in_array ($vatRate, [self::VAT_RATE_NORMAL, self::VAT_RATE_REDUCED, self::VAT_RATE_SPECIAL, self::VAT_RATE_ZERO], true)) {
-			throw new InvalidArgumentException('Invalid VAT rate: ' . $vatRate);
+		if(!in_array ($vatRate, [self::VAT_RATE_NORMAL, self::VAT_RATE_REDUCED, self::VAT_RATE_SPECIAL, self::VAT_RATE_NULL], true)) {
+			throw new InvalidArgumentException('Invalid VAT rate: ' . $vatRate . '. Allowed values are: ' . implode(', ', [self::VAT_RATE_NORMAL, self::VAT_RATE_REDUCED, self::VAT_RATE_SPECIAL, self::VAT_RATE_NULL]));
 		}
 
 		$this->vatRate = $vatRate;
