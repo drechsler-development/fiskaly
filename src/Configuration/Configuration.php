@@ -11,7 +11,7 @@ final class Configuration {
 	public const string DEFAULT_BASE_URL_SIGN_DE    = 'https://kassensichv-middleware.fiskaly.com/api/v2';
 	public const string DEFAULT_BASE_URL_MANAGEMENT = 'https://dashboard.fiskaly.com/api/v0';
 	// Base URL for the DSFinV-K API (used by FiskalyDSFinV)
-	public const string DEFAULT_BASE_URL_DSFINVK    = 'https://kassensichv-middleware.fiskaly.com/api/dsfinvk/v1';
+	public const string DEFAULT_BASE_URL_DSFINVK    = 'https://dsfinvk.fiskaly.com/api/v1';
 
 	public string $baseUrl;
 
