@@ -14,59 +14,54 @@ final class CashPointClosingService extends AbstractService {
     }
 
     /**
-     * @param string $cashRegisterId
      * @param array $query
      * @return array
      * @throws RandomException
      */
-    public function ListCashPointClosings (string $cashRegisterId, array $query = []): array {
-        return $this->Json ('GET', $this->Path('/cash_registers/{id}/cash_point_closings', ['id' => $cashRegisterId]), null, $this->BuildQueryString($query));
+    public function ListCashPointClosings (array $query = []): array {
+        return $this->Json ('GET', $this->Path('/cash_point_closings'), null, $this->BuildQueryString($query));
     }
 
     /**
-     * @param string $cashRegisterId
      * @param string $closingId
      * @param array $body
      * @return array
      * @throws RandomException
      */
-    public function CreateCashPointClosing (string $cashRegisterId, string $closingId, array $body = []): array {
-        return $this->Json ('PUT', $this->Path('/cash_registers/{id}/cash_point_closings/{closingId}', ['id' => $cashRegisterId, 'closingId' => $closingId]), $body);
+    public function CreateCashPointClosing (string $closingId, array $body = []): array {
+        return $this->Json ('PUT', $this->Path('/cash_point_closings/{closingId}', ['closingId' => $closingId]), $body);
     }
 
     /**
-     * @param string $cashRegisterId
      * @param string $closingId
      * @return array
      * @throws RandomException
      */
-    public function RetrieveCashPointClosing (string $cashRegisterId, string $closingId): array {
-        return $this->Json ('GET', $this->Path('/cash_registers/{id}/cash_point_closings/{closingId}', ['id' => $cashRegisterId, 'closingId' => $closingId]));
+    public function RetrieveCashPointClosing (string $closingId): array {
+        return $this->Json ('GET', $this->Path('/cash_point_closings/{closingId}', ['closingId' => $closingId]));
     }
 
     /**
      * Update a cash point closing
      *
-     * @param string $cashRegisterId
      * @param string $closingId
      * @param array $body
      * @return array
      * @throws RandomException
      */
-    public function UpdateCashPointClosing (string $cashRegisterId, string $closingId, array $body): array {
-        return $this->Json('PATCH', $this->Path('/cash_registers/{id}/cash_point_closings/{closingId}', ['id' => $cashRegisterId, 'closingId' => $closingId]), $body);
+    public function UpdateCashPointClosing (string $closingId, array $body): array {
+        return $this->Json('PATCH', $this->Path('/cash_point_closings/{closingId}', ['closingId' => $closingId]), $body);
     }
 
     /**
      * Delete a cash point closing
      *
-     * @param string $cashRegisterId
      * @param string $closingId
      * @return array
      * @throws RandomException
      */
-    public function DeleteCashPointClosing (string $cashRegisterId, string $closingId): array {
-        return $this->Json('DELETE', $this->Path('/cash_registers/{id}/cash_point_closings/{closingId}', ['id' => $cashRegisterId, 'closingId' => $closingId]));
+    public function DeleteCashPointClosing (string $closingId): array {
+        return $this->Json('DELETE', $this->Path('/cash_point_closings/{closingId}', ['closingId' => $closingId]));
     }
 
 }

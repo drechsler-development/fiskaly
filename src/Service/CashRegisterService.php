@@ -22,41 +22,46 @@ final class CashRegisterService extends AbstractService {
         return $this->Json ('GET', '/cash_registers', null, $this->BuildQueryString($query));
     }
 
+	/**
+	 * @param string $clientId
+	 * @param array  $body
+	 *
+	 * @return array
+	 * @throws RandomException
+	 */
+    public function CreateCashRegister (string $clientId, array $body): array {
+        return $this->Json ('PUT', $this->Path ('/cash_registers/{clientId}', ['clientId' => $clientId]), $body);
+    }
+
     /**
+     * @param string $clientId
+     *
+     * @return array
+     * @throws RandomException
+     */
+    public function RetrieveCashRegister (string $clientId): array {
+        return $this->Json ('GET', $this->Path('/cash_registers/{clientId}', ['clientId' => $clientId]));
+    }
+
+    /**
+     * @param string $clientId
      * @param array $body
+     *
      * @return array
      * @throws RandomException
      */
-    public function CreateCashRegister (array $body): array {
-        return $this->Json ('POST', '/cash_registers', $body);
+    public function UpdateCashRegister (string $clientId, array $body): array {
+        return $this->Json ('PUT', $this->Path('/cash_registers/{clientId}', ['clientId' => $clientId]), $body);
     }
 
     /**
-     * @param string $cashRegisterId
+     * @param string $clientId
+     *
      * @return array
      * @throws RandomException
      */
-    public function RetrieveCashRegister (string $cashRegisterId): array {
-        return $this->Json ('GET', $this->Path('/cash_registers/{id}', ['id' => $cashRegisterId]));
-    }
-
-    /**
-     * @param string $cashRegisterId
-     * @param array $body
-     * @return array
-     * @throws RandomException
-     */
-    public function UpdateCashRegister (string $cashRegisterId, array $body): array {
-        return $this->Json ('PATCH', $this->Path('/cash_registers/{id}', ['id' => $cashRegisterId]), $body);
-    }
-
-    /**
-     * @param string $cashRegisterId
-     * @return array
-     * @throws RandomException
-     */
-    public function DeleteCashRegister (string $cashRegisterId): array {
-        return $this->Json ('DELETE', $this->Path('/cash_registers/{id}', ['id' => $cashRegisterId]));
+    public function DeleteCashRegister (string $clientId): array {
+        return $this->Json ('DELETE', $this->Path('/cash_registers/{clientId}', ['clientId' => $clientId]));
     }
 
 }

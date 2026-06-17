@@ -97,32 +97,32 @@ class FiskalyDSFinV extends FiskalyBase {
         return $response;
     }
 
-    public function CreateCashRegister (array $data): array {
-        $response = $this->CashRegisterService ()->CreateCashRegister ($data);
+    public function CreateCashRegister (string $clientId, array $data): array {
+        $response = $this->CashRegisterService ()->CreateCashRegister ($clientId, $data);
         if ($this->debug) {
             $this->PrintResult ('Create Cash Register', $response);
         }
         return $response;
     }
 
-    public function RetrieveCashRegister (string $cashRegisterId): array {
-        $response = $this->CashRegisterService ()->RetrieveCashRegister ($cashRegisterId);
+    public function RetrieveCashRegister (string $clientId): array {
+        $response = $this->CashRegisterService ()->RetrieveCashRegister ($clientId);
         if ($this->debug) {
             $this->PrintResult ('Retrieve Cash Register', $response);
         }
         return $response;
     }
 
-    public function UpdateCashRegister (string $cashRegisterId, array $data): array {
-        $response = $this->CashRegisterService ()->UpdateCashRegister ($cashRegisterId, $data);
+    public function UpdateCashRegister (string $clientId, array $data): array {
+        $response = $this->CashRegisterService ()->UpdateCashRegister ($clientId, $data);
         if ($this->debug) {
             $this->PrintResult ('Update Cash Register', $response);
         }
         return $response;
     }
 
-    public function DeleteCashRegister (string $cashRegisterId): array {
-        $response = $this->CashRegisterService ()->DeleteCashRegister ($cashRegisterId);
+    public function DeleteCashRegister (string $clientId): array {
+        $response = $this->CashRegisterService ()->DeleteCashRegister ($clientId);
         if ($this->debug) {
             $this->PrintResult ('Delete Cash Register', $response);
         }
@@ -131,40 +131,40 @@ class FiskalyDSFinV extends FiskalyBase {
 
     # Cash point closing methods
 
-    public function ListCashPointClosings (string $cashRegisterId, array $query = []): array {
-        $response = $this->CashPointClosingService ()->ListCashPointClosings ($cashRegisterId, $query);
+    public function ListCashPointClosings (array $query = []): array {
+        $response = $this->CashPointClosingService ()->ListCashPointClosings ($query);
         if ($this->debug) {
             $this->PrintResult ('List Cash Point Closings', $response);
         }
         return $response;
     }
 
-    public function CreateCashPointClosing (string $cashRegisterId, string $closingId, array $body = []): array {
-        $response = $this->CashPointClosingService ()->CreateCashPointClosing ($cashRegisterId, $closingId, $body);
+    public function CreateCashPointClosing (string $closingId, array $body = []): array {
+        $response = $this->CashPointClosingService ()->CreateCashPointClosing ($closingId, $body);
         if ($this->debug) {
             $this->PrintResult ('Create Cash Point Closing', $response);
         }
         return $response;
     }
 
-    public function RetrieveCashPointClosing (string $cashRegisterId, string $closingId): array {
-        $response = $this->CashPointClosingService ()->RetrieveCashPointClosing ($cashRegisterId, $closingId);
+    public function RetrieveCashPointClosing (string $closingId): array {
+        $response = $this->CashPointClosingService ()->RetrieveCashPointClosing ($closingId);
         if ($this->debug) {
             $this->PrintResult ('Retrieve Cash Point Closing', $response);
         }
         return $response;
     }
 
-    public function UpdateCashPointClosing (string $cashRegisterId, string $closingId, array $body): array {
-        $response = $this->CashPointClosingService ()->UpdateCashPointClosing ($cashRegisterId, $closingId, $body);
+    public function UpdateCashPointClosing (string $closingId, array $body): array {
+        $response = $this->CashPointClosingService ()->UpdateCashPointClosing ($closingId, $body);
         if ($this->debug) {
             $this->PrintResult ('Update Cash Point Closing', $response);
         }
         return $response;
     }
 
-    public function DeleteCashPointClosing (string $cashRegisterId, string $closingId): array {
-        $response = $this->CashPointClosingService ()->DeleteCashPointClosing ($cashRegisterId, $closingId);
+    public function DeleteCashPointClosing (string $closingId): array {
+        $response = $this->CashPointClosingService ()->DeleteCashPointClosing ($closingId);
         if ($this->debug) {
             $this->PrintResult ('Delete Cash Point Closing', $response);
         }
